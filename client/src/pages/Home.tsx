@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { Building, Users, TrendingUp, Clock, Plus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { Property, Lead } from '@shared/schema';
+import type { Property, Lead } from '@shared/models';
 
 export default function Home() {
   // Fetch dashboard data
@@ -38,7 +38,7 @@ export default function Home() {
               Dashboard
             </h1>
             <p className="text-muted-foreground">
-              Welcome back to GIFI Real Estate Admin
+              Welcome back to Gift Real Estate Admin
             </p>
           </div>
           <div className="flex space-x-3">

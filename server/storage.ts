@@ -1,12 +1,13 @@
+import mongoose from "./db";
 import {
-  users,
-  properties,
-  projects,
-  constructionUpdates,
-  blogPosts,
-  teamMembers,
-  leads,
-  settings,
+  UserModel,
+  PropertyModel,
+  ProjectModel,
+  ConstructionUpdateModel,
+  BlogPostModel,
+  TeamMemberModel,
+  LeadModel,
+  SettingModel,
   type User,
   type UpsertUser,
   type Property,
@@ -14,7 +15,6 @@ import {
   type Project,
   type InsertProject,
   type ConstructionUpdate,
-  type InsertConstructionUpdate,
   type BlogPost,
   type InsertBlogPost,
   type TeamMember,
@@ -23,9 +23,7 @@ import {
   type InsertLead,
   type Setting,
   type InsertSetting,
-} from "@shared/schema";
-import { db } from "./db";
-import { eq, desc, asc, like, and, or, sql } from "drizzle-orm";
+} from "@shared/models";
 
 export interface IStorage {
   // User operations - mandatory for Replit Auth
@@ -56,7 +54,7 @@ export interface IStorage {
   
   // Construction update operations
   getConstructionUpdates(projectId?: string): Promise<ConstructionUpdate[]>;
-  createConstructionUpdate(update: InsertConstructionUpdate): Promise<ConstructionUpdate>;
+  createConstructionUpdate(update: any): Promise<ConstructionUpdate>;
   
   // Blog operations
   getBlogPosts(published?: boolean): Promise<BlogPost[]>;
@@ -89,22 +87,16 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations - mandatory for Replit Auth
   async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+    const user = await UserModel.findById(id);
+    return user || undefined;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
+    const user = await UserModel.findByIdAndUpdate(
+      userData._id || new mongoose.Types.ObjectId(),
+      { ...userData, updatedAt: new Date() },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
     return user;
   }
 
@@ -118,244 +110,200 @@ export class DatabaseStorage implements IStorage {
     maxPrice?: number;
     featured?: boolean;
   }): Promise<Property[]> {
-    let query = db.select().from(properties);
+    const query: any = {};
     
     if (filters) {
-      const conditions = [];
-      
-      if (filters.type) conditions.push(eq(properties.propertyType, filters.type as any));
-      if (filters.listingType) conditions.push(eq(properties.listingType, filters.listingType as any));
-      if (filters.status) conditions.push(eq(properties.status, filters.status as any));
-      if (filters.location) conditions.push(like(properties.location, `%${filters.location}%`));
-      if (filters.minPrice) conditions.push(sql`${properties.price} >= ${filters.minPrice}`);
-      if (filters.maxPrice) conditions.push(sql`${properties.price} <= ${filters.maxPrice}`);
-      if (filters.featured !== undefined) conditions.push(eq(properties.featured, filters.featured));
-      
-      if (conditions.length > 0) {
-        query = query.where(and(...conditions));
+      if (filters.type) query.propertyType = filters.type;
+      if (filters.listingType) query.listingType = filters.listingType;
+      if (filters.status) query.status = filters.status;
+      if (filters.location) query.location = { $regex: filters.location, $options: 'i' };
+      if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+        query.price = {};
+        if (filters.minPrice !== undefined) query.price.$gte = filters.minPrice;
+        if (filters.maxPrice !== undefined) query.price.$lte = filters.maxPrice;
       }
+      if (filters.featured !== undefined) query.featured = filters.featured;
     }
     
-    return await query.orderBy(desc(properties.createdAt));
+    return await PropertyModel.find(query).sort({ createdAt: -1 });
   }
 
   async getProperty(id: string): Promise<Property | undefined> {
-    const [property] = await db.select().from(properties).where(eq(properties.id, id));
-    return property;
+    const property = await PropertyModel.findById(id);
+    return property || undefined;
   }
 
   async createProperty(property: InsertProperty): Promise<Property> {
-    const [newProperty] = await db
-      .insert(properties)
-      .values(property)
-      .returning();
-    return newProperty;
+    const newProperty = new PropertyModel(property);
+    return await newProperty.save();
   }
 
   async updateProperty(id: string, property: Partial<InsertProperty>): Promise<Property> {
-    const [updatedProperty] = await db
-      .update(properties)
-      .set({ ...property, updatedAt: new Date() })
-      .where(eq(properties.id, id))
-      .returning();
+    const updatedProperty = await PropertyModel.findByIdAndUpdate(
+      id,
+      { ...property, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!updatedProperty) throw new Error('Property not found');
     return updatedProperty;
   }
 
   async deleteProperty(id: string): Promise<void> {
-    await db.delete(properties).where(eq(properties.id, id));
+    await PropertyModel.findByIdAndDelete(id);
   }
 
   // Project operations
   async getProjects(): Promise<Project[]> {
-    return db.select().from(projects).orderBy(desc(projects.createdAt));
+    return await ProjectModel.find().sort({ createdAt: -1 });
   }
 
   async getProject(id: string): Promise<Project | undefined> {
-    const [project] = await db.select().from(projects).where(eq(projects.id, id));
-    return project;
+    const project = await ProjectModel.findById(id);
+    return project || undefined;
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const [newProject] = await db
-      .insert(projects)
-      .values(project)
-      .returning();
-    return newProject;
+    const newProject = new ProjectModel(project);
+    return await newProject.save();
   }
 
   async updateProject(id: string, project: Partial<InsertProject>): Promise<Project> {
-    const [updatedProject] = await db
-      .update(projects)
-      .set({ ...project, updatedAt: new Date() })
-      .where(eq(projects.id, id))
-      .returning();
+    const updatedProject = await ProjectModel.findByIdAndUpdate(
+      id,
+      { ...project, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!updatedProject) throw new Error('Project not found');
     return updatedProject;
   }
 
   async deleteProject(id: string): Promise<void> {
-    await db.delete(projects).where(eq(projects.id, id));
+    await ProjectModel.findByIdAndDelete(id);
   }
 
   // Construction update operations
   async getConstructionUpdates(projectId?: string): Promise<ConstructionUpdate[]> {
-    let query = db.select().from(constructionUpdates);
-    
-    if (projectId) {
-      query = query.where(eq(constructionUpdates.projectId, projectId));
-    }
-    
-    return await query.orderBy(desc(constructionUpdates.updateDate));
+    const query = projectId ? { projectId } : {};
+    return await ConstructionUpdateModel.find(query).sort({ updateDate: -1 });
   }
 
-  async createConstructionUpdate(update: InsertConstructionUpdate): Promise<ConstructionUpdate> {
-    const [newUpdate] = await db
-      .insert(constructionUpdates)
-      .values(update)
-      .returning();
-    return newUpdate;
+  async createConstructionUpdate(update: any): Promise<ConstructionUpdate> {
+    const newUpdate = new ConstructionUpdateModel(update);
+    return await newUpdate.save();
   }
 
   // Blog operations
   async getBlogPosts(published?: boolean): Promise<BlogPost[]> {
-    let query = db.select().from(blogPosts);
-    
-    if (published !== undefined) {
-      query = query.where(eq(blogPosts.published, published));
-    }
-    
-    return await query.orderBy(desc(blogPosts.createdAt));
+    const query = published !== undefined ? { published } : {};
+    return await BlogPostModel.find(query).sort({ createdAt: -1 });
   }
 
   async getBlogPost(id: string): Promise<BlogPost | undefined> {
-    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
-    return post;
+    const post = await BlogPostModel.findById(id);
+    return post || undefined;
   }
 
   async getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
-    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.slug, slug));
-    return post;
+    const post = await BlogPostModel.findOne({ slug });
+    return post || undefined;
   }
 
   async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
-    const [newPost] = await db
-      .insert(blogPosts)
-      .values(post)
-      .returning();
-    return newPost;
+    const newPost = new BlogPostModel(post);
+    return await newPost.save();
   }
 
   async updateBlogPost(id: string, post: Partial<InsertBlogPost>): Promise<BlogPost> {
-    const [updatedPost] = await db
-      .update(blogPosts)
-      .set({ ...post, updatedAt: new Date() })
-      .where(eq(blogPosts.id, id))
-      .returning();
+    const updatedPost = await BlogPostModel.findByIdAndUpdate(
+      id,
+      { ...post, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!updatedPost) throw new Error('Blog post not found');
     return updatedPost;
   }
 
   async deleteBlogPost(id: string): Promise<void> {
-    await db.delete(blogPosts).where(eq(blogPosts.id, id));
+    await BlogPostModel.findByIdAndDelete(id);
   }
 
   // Team operations
   async getTeamMembers(active?: boolean): Promise<TeamMember[]> {
-    let query = db.select().from(teamMembers);
-    
-    if (active !== undefined) {
-      query = query.where(eq(teamMembers.active, active));
-    }
-    
-    return await query.orderBy(asc(teamMembers.displayOrder));
+    const query = active !== undefined ? { active } : {};
+    return await TeamMemberModel.find(query).sort({ displayOrder: 1 });
   }
 
   async getTeamMember(id: string): Promise<TeamMember | undefined> {
-    const [member] = await db.select().from(teamMembers).where(eq(teamMembers.id, id));
-    return member;
+    const member = await TeamMemberModel.findById(id);
+    return member || undefined;
   }
 
   async createTeamMember(member: InsertTeamMember): Promise<TeamMember> {
-    const [newMember] = await db
-      .insert(teamMembers)
-      .values(member)
-      .returning();
-    return newMember;
+    const newMember = new TeamMemberModel(member);
+    return await newMember.save();
   }
 
   async updateTeamMember(id: string, member: Partial<InsertTeamMember>): Promise<TeamMember> {
-    const [updatedMember] = await db
-      .update(teamMembers)
-      .set({ ...member, updatedAt: new Date() })
-      .where(eq(teamMembers.id, id))
-      .returning();
+    const updatedMember = await TeamMemberModel.findByIdAndUpdate(
+      id,
+      { ...member, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!updatedMember) throw new Error('Team member not found');
     return updatedMember;
   }
 
   async deleteTeamMember(id: string): Promise<void> {
-    await db.delete(teamMembers).where(eq(teamMembers.id, id));
+    await TeamMemberModel.findByIdAndDelete(id);
   }
 
   // Lead operations
   async getLeads(status?: string): Promise<Lead[]> {
-    let query = db.select().from(leads);
-    
-    if (status) {
-      query = query.where(eq(leads.status, status));
-    }
-    
-    return await query.orderBy(desc(leads.createdAt));
+    const query = status ? { status } : {};
+    return await LeadModel.find(query).sort({ createdAt: -1 });
   }
 
   async getLead(id: string): Promise<Lead | undefined> {
-    const [lead] = await db.select().from(leads).where(eq(leads.id, id));
-    return lead;
+    const lead = await LeadModel.findById(id);
+    return lead || undefined;
   }
 
   async createLead(lead: InsertLead): Promise<Lead> {
-    const [newLead] = await db
-      .insert(leads)
-      .values(lead)
-      .returning();
-    return newLead;
+    const newLead = new LeadModel(lead);
+    return await newLead.save();
   }
 
   async updateLead(id: string, lead: Partial<InsertLead>): Promise<Lead> {
-    const [updatedLead] = await db
-      .update(leads)
-      .set({ ...lead, updatedAt: new Date() })
-      .where(eq(leads.id, id))
-      .returning();
+    const updatedLead = await LeadModel.findByIdAndUpdate(
+      id,
+      { ...lead, updatedAt: new Date() },
+      { new: true }
+    );
+    if (!updatedLead) throw new Error('Lead not found');
     return updatedLead;
   }
 
   async deleteLead(id: string): Promise<void> {
-    await db.delete(leads).where(eq(leads.id, id));
+    await LeadModel.findByIdAndDelete(id);
   }
 
   // Settings operations
   async getSettings(): Promise<Setting[]> {
-    return db.select().from(settings).orderBy(asc(settings.key));
+    return await SettingModel.find().sort({ key: 1 });
   }
 
   async getSetting(key: string): Promise<Setting | undefined> {
-    const [setting] = await db.select().from(settings).where(eq(settings.key, key));
-    return setting;
+    const setting = await SettingModel.findOne({ key });
+    return setting || undefined;
   }
 
   async upsertSetting(setting: InsertSetting): Promise<Setting> {
-    const [newSetting] = await db
-      .insert(settings)
-      .values(setting)
-      .onConflictDoUpdate({
-        target: settings.key,
-        set: {
-          value: setting.value,
-          type: setting.type,
-          description: setting.description,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return newSetting;
+    const updatedSetting = await SettingModel.findOneAndUpdate(
+      { key: setting.key },
+      { ...setting, updatedAt: new Date() },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+    return updatedSetting;
   }
 }
 

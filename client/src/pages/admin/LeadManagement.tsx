@@ -25,7 +25,7 @@ import {
   Download,
   Archive
 } from 'lucide-react';
-import type { Lead } from '@shared/schema';
+import type { Lead } from '@shared/models';
 
 export default function LeadManagement() {
   const [searchQuery, setSearchQuery] = useState('');

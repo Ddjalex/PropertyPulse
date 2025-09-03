@@ -24,7 +24,7 @@ import {
   Dumbbell,
   ShieldCheck
 } from 'lucide-react';
-import type { Property } from '@shared/schema';
+import type { Property } from '@shared/models';
 
 export default function PropertyDetail() {
   const { id } = useParams<{ id: string }>();
@@ -69,7 +69,7 @@ export default function PropertyDetail() {
   const handleEmail = () => {
     const subject = `Inquiry about ${property.title}`;
     const body = `Hi, I'm interested in learning more about the property: ${property.title} located in ${property.location}.`;
-    window.location.href = `mailto:info@gifirealestate.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:info@giftrealestate.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   const handleShare = async () => {
@@ -342,7 +342,7 @@ export default function PropertyDetail() {
 
                 <div className="mt-6 pt-6 border-t border-border">
                   <div className="text-center text-sm text-muted-foreground">
-                    <p>Listed by GIFI Real Estate</p>
+                    <p>Listed by Gift Real Estate</p>
                     <p className="font-medium text-foreground">Professional Property Consultants</p>
                   </div>
                 </div>

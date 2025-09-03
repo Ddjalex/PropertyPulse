@@ -15,7 +15,7 @@ import {
   Mail,
   MapPin
 } from 'lucide-react';
-import type { Property, Lead, Project, TeamMember } from '@shared/schema';
+import type { Property, Lead, Project, TeamMember } from '@shared/models';
 
 export default function Dashboard() {
   // Fetch dashboard data
@@ -60,7 +60,7 @@ export default function Dashboard() {
               Dashboard Overview
             </h1>
             <p className="text-muted-foreground">
-              Welcome back to GIFI Real Estate Admin Portal
+              Welcome back to Gift Real Estate Admin Portal
             </p>
           </div>
           <div className="flex space-x-3">

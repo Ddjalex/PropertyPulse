@@ -21,7 +21,7 @@ import {
   Instagram,
   Linkedin
 } from 'lucide-react';
-import { insertLeadSchema } from '@shared/schema';
+import { insertLeadSchema } from '@shared/models';
 import { z } from 'zod';
 
 const contactFormSchema = insertLeadSchema.extend({

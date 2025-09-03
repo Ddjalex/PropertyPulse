@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Phone, MessageCircle, Mail } from 'lucide-react';
-import type { TeamMember } from '@shared/schema';
+import type { TeamMember } from '@shared/models';
 
 interface TeamMemberProps {
   member: TeamMember;

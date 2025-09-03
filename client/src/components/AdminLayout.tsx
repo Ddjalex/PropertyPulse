@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import type { User } from '@shared/schema';
+import type { User } from '@shared/models';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -58,7 +58,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
               <span className="text-sm font-bold text-secondary-foreground">G</span>
             </div>
-            <span className="text-lg font-bold">GIFI Admin</span>
+            <span className="text-lg font-bold">Gift Admin</span>
           </div>
           <Button
             variant="ghost"

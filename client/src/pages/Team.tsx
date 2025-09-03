@@ -15,7 +15,7 @@ import {
   Star,
   MapPin
 } from 'lucide-react';
-import type { TeamMember } from '@shared/schema';
+import type { TeamMember } from '@shared/models';
 
 export default function Team() {
   const { data: teamMembers, isLoading } = useQuery<TeamMember[]>({

@@ -28,8 +28,8 @@ import {
   X,
   Building
 } from 'lucide-react';
-import type { Property, InsertProperty } from '@shared/schema';
-import { insertPropertySchema } from '@shared/schema';
+import type { Property, InsertProperty } from '@shared/models';
+import { insertPropertySchema } from '@shared/models';
 import { z } from 'zod';
 
 const propertyFormSchema = insertPropertySchema.extend({

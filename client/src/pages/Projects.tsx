@@ -17,7 +17,7 @@ import {
   Users,
   Clock
 } from 'lucide-react';
-import type { Project, ConstructionUpdate } from '@shared/schema';
+import type { Project, ConstructionUpdate } from '@shared/models';
 
 export default function Projects() {
   const [selectedProject, setSelectedProject] = useState<string | null>(null);

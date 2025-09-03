@@ -17,7 +17,7 @@ import {
   ChevronLeft,
   Filter
 } from 'lucide-react';
-import type { Property } from '@shared/schema';
+import type { Property } from '@shared/models';
 
 export default function Properties() {
   const [searchQuery, setSearchQuery] = useState('');

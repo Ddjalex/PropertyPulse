@@ -23,7 +23,7 @@ import {
   Heart
 } from 'lucide-react';
 import { useState } from 'react';
-import type { Property, TeamMember, Project } from '@shared/schema';
+import type { Property, TeamMember, Project } from '@shared/models';
 
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -59,7 +59,7 @@ export default function Landing() {
     window.open(whatsappUrl, '_blank');
   };
 
-  const handleEmail = (email: string = 'info@gifirealestate.com', subject?: string) => {
+  const handleEmail = (email: string = 'info@giftrealestate.com', subject?: string) => {
     window.location.href = `mailto:${email}${subject ? `?subject=${encodeURIComponent(subject)}` : ''}`;
   };
 
@@ -79,7 +79,7 @@ export default function Landing() {
                 <span className="text-lg font-bold text-secondary-foreground">G</span>
               </div>
               <div>
-                <span className="text-xl font-bold">GIFI</span>
+                <span className="text-xl font-bold">Gift</span>
                 <span className="text-sm block text-primary-foreground/80">Real Estate</span>
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function Landing() {
       <section className="py-16 bg-muted">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-foreground mb-4">Why Choose GIFI Real Estate</h2>
+            <h2 className="text-4xl font-bold text-foreground mb-4">Why Choose Gift Real Estate</h2>
             <p className="text-xl text-muted-foreground">Over 30 years of excellence in Ethiopian real estate</p>
           </div>
           
@@ -389,7 +389,7 @@ export default function Landing() {
                   member={member}
                   onCall={(member) => handleCall(member.phone || '+251911123456')}
                   onWhatsApp={(member) => handleWhatsApp(member.whatsapp || '+251911123456')}
-                  onEmail={(member) => handleEmail(member.email || 'info@gifirealestate.com')}
+                  onEmail={(member) => handleEmail(member.email || 'info@giftrealestate.com')}
                 />
               ))
             ) : (
@@ -448,8 +448,8 @@ export default function Landing() {
                   <div>
                     <h3 className="text-lg font-semibold text-foreground mb-2">Email</h3>
                     <p className="text-muted-foreground">
-                      info@gifirealestate.com<br />
-                      sales@gifirealestate.com
+                      info@giftrealestate.com<br />
+                      sales@giftrealestate.com
                     </p>
                   </div>
                 </div>
@@ -550,7 +550,7 @@ export default function Landing() {
                   <span className="text-lg font-bold text-secondary-foreground">G</span>
                 </div>
                 <div>
-                  <span className="text-xl font-bold">GIFI</span>
+                  <span className="text-xl font-bold">Gift</span>
                   <span className="text-sm block text-primary-foreground/80">Real Estate</span>
                 </div>
               </div>
@@ -608,7 +608,7 @@ export default function Landing() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <Mail size={16} />
-                  <span>info@gifirealestate.com</span>
+                  <span>info@giftrealestate.com</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <MessageCircle size={16} />
@@ -619,7 +619,7 @@ export default function Landing() {
           </div>
           
           <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-primary-foreground/60">
-            <p>&copy; 2024 GIFI Real Estate. All rights reserved. | Trusted since 1990</p>
+            <p>&copy; 2024 Gift Real Estate. All rights reserved. | Trusted since 1990</p>
           </div>
         </div>
       </footer>
