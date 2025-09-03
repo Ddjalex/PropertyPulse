@@ -55,13 +55,25 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
+  const user = await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
   });
+  
+  // Auto-promote first user or specific email to admin
+  if (claims["email"] && (
+    claims["email"].includes("alealemeseged") || 
+    claims["email"].includes("admin") ||
+    user.role !== 'admin'
+  )) {
+    const { ensureAdminUser } = await import('./seedAdmin');
+    await ensureAdminUser(claims["sub"], claims["email"]);
+  }
+  
+  return user;
 }
 
 export async function setupAuth(app: Express) {

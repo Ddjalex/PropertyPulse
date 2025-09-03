@@ -31,12 +31,12 @@ export default function Landing() {
 
   // Fetch featured properties
   const { data: properties, isLoading: propertiesLoading } = useQuery<Property[]>({
-    queryKey: ['/api/properties', { featured: true }],
+    queryKey: ['/api/properties?featured=true'],
   });
 
   // Fetch team members
   const { data: teamMembers, isLoading: teamLoading } = useQuery<TeamMember[]>({
-    queryKey: ['/api/team', { active: true }],
+    queryKey: ['/api/team?active=true'],
   });
 
   // Fetch projects

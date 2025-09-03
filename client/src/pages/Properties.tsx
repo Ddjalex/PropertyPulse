@@ -41,7 +41,7 @@ export default function Properties() {
   if (filters.maxPrice) queryParams.append('maxPrice', filters.maxPrice);
 
   const { data: properties, isLoading } = useQuery<Property[]>({
-    queryKey: ['/api/properties', Object.fromEntries(queryParams)],
+    queryKey: [`/api/properties?${queryParams.toString()}`],
   });
 
   const filteredProperties = properties?.filter(property => {
