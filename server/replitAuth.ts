@@ -27,8 +27,7 @@ export function getSession() {
   const MongoDBStore = connectMongo(session);
   const sessionStore = new MongoDBStore({
     uri: process.env.MONGODB_URI!,
-    collection: "sessions",
-    ttl: Math.floor(sessionTtl / 1000), // TTL in seconds for MongoDB
+    collection: "sessions"
   });
   return session({
     secret: process.env.SESSION_SECRET!,

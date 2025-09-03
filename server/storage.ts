@@ -92,12 +92,34 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const user = await UserModel.findByIdAndUpdate(
-      userData._id || new mongoose.Types.ObjectId(),
-      { ...userData, updatedAt: new Date() },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
-    return user;
+    if (userData.id) {
+      // Try to find and update existing user by id
+      const existingUser = await UserModel.findByIdAndUpdate(
+        userData.id,
+        { ...userData, updatedAt: new Date() },
+        { new: true, setDefaultsOnInsert: true }
+      );
+      if (existingUser) return existingUser;
+    }
+    
+    // If user has email, try to find by email first
+    if (userData.email) {
+      const existingUser = await UserModel.findOneAndUpdate(
+        { email: userData.email },
+        { ...userData, updatedAt: new Date() },
+        { new: true, setDefaultsOnInsert: true }
+      );
+      if (existingUser) return existingUser;
+    }
+    
+    // Create new user
+    const newUser = new UserModel({ 
+      ...(userData.id && { _id: userData.id }),
+      ...userData, 
+      createdAt: new Date(), 
+      updatedAt: new Date() 
+    });
+    return await newUser.save();
   }
 
   // Property operations

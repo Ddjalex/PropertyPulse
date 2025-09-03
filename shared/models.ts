@@ -37,7 +37,7 @@ const SessionSchema = new Schema<Session>({
 
 // User interface and schema
 export interface User extends Document {
-  _id: string;
+  id: string;
   email?: string;
   firstName?: string;
   lastName?: string;

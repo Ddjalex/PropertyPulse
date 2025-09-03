@@ -5,12 +5,11 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
   insertPropertySchema, 
   insertProjectSchema, 
-  insertConstructionUpdateSchema, 
   insertBlogPostSchema, 
   insertTeamMemberSchema, 
   insertLeadSchema,
   insertSettingSchema 
-} from "@shared/schema";
+} from "@shared/models";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
