@@ -63,8 +63,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-primary to-primary/90 text-primary-foreground transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-primary to-primary/90 text-primary-foreground transform transition-transform duration-300 ease-in-out 
+        lg:translate-x-0 lg:static lg:inset-0 lg:z-auto
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="flex items-center justify-between h-16 px-6 border-b border-primary-foreground/20">
           <div className="flex items-center space-x-3">
@@ -144,7 +145,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       </div>
 
       {/* Main content */}
-      <div className="lg:pl-64">
+      <div className="lg:ml-64">
         {/* Top bar */}
         <div className="sticky top-0 z-30 flex items-center justify-between h-16 px-6 bg-background border-b border-border lg:hidden">
           <Button
@@ -155,7 +156,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           >
             <Menu size={20} />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground">GIFI Admin</h1>
+          <h1 className="text-lg font-semibold text-foreground">Gift Admin</h1>
           <div></div>
         </div>
 
