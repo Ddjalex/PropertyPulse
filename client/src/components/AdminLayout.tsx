@@ -63,22 +63,22 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Sidebar */}
       <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-gradient-to-b from-primary to-primary/90 text-primary-foreground transform transition-transform duration-300 ease-in-out 
+        fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-300 ease-in-out 
         lg:translate-x-0 lg:static lg:inset-0 lg:z-auto
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-primary-foreground/20">
+        <div className="flex items-center justify-between h-16 px-6 border-b border-white/20">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-              <span className="text-sm font-bold text-secondary-foreground">G</span>
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-sm font-bold text-white">G</span>
             </div>
-            <span className="text-lg font-bold">Gift Admin</span>
+            <span className="text-lg font-bold text-white">Gift Admin</span>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-primary-foreground hover:bg-primary-foreground/10"
+            className="lg:hidden text-white hover:bg-white/10"
           >
             <Menu size={20} />
           </Button>
@@ -96,8 +96,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     className={`
                       flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors
                       ${isActive 
-                        ? 'bg-primary-foreground/20 text-primary-foreground' 
-                        : 'text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10'
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
                       }
                     `}
                     data-testid={`nav-${item.name.toLowerCase()}`}
@@ -112,21 +112,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         <div className="absolute bottom-4 left-4 right-4">
-          <div className="border-t border-primary-foreground/20 pt-4">
+          <div className="border-t border-white/20 pt-4">
             <div className="flex items-center space-x-3 mb-3 px-3">
-              <div className="w-8 h-8 bg-primary-foreground/20 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-primary-foreground">
+              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
                   {user?.firstName?.[0] || user?.email?.[0] || 'U'}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-primary-foreground truncate">
+                <p className="text-sm font-medium text-white truncate">
                   {user?.firstName && user?.lastName 
                     ? `${user.firstName} ${user.lastName}`
                     : user?.email || 'User'
                   }
                 </p>
-                <p className="text-xs text-primary-foreground/70 capitalize">
+                <p className="text-xs text-gray-300 capitalize">
                   {user?.role || 'user'}
                 </p>
               </div>
@@ -134,7 +134,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Button
               onClick={handleLogout}
               variant="ghost"
-              className="w-full justify-start text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10"
+              className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
               data-testid="button-logout"
             >
               <LogOut size={16} className="mr-2" />
