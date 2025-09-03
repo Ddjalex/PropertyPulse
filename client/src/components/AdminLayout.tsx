@@ -34,8 +34,25 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user } = useAuth();
 
-  const handleLogout = () => {
-    window.location.href = '/api/logout';
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        window.location.href = '/login';
+      } else {
+        // If logout fails, still redirect to login
+        window.location.href = '/login';
+      }
+    } catch (error) {
+      // If there's an error, still redirect to login
+      window.location.href = '/login';
+    }
   };
 
   return (
