@@ -1,6 +1,14 @@
 # Overview
 
-GIFI Real Estate is a comprehensive real estate management platform built with React, Express, and PostgreSQL. The application serves as both a public-facing property showcase and an internal management system for real estate operations in Ethiopia. It features property listings with advanced filtering, team member profiles, construction project tracking, blog content management, and lead generation capabilities.
+Gift Real Estate is a comprehensive real estate management platform built with React, Express, and MongoDB. The application serves as both a public-facing property showcase and an internal management system for real estate operations in Ethiopia. It features property listings with advanced filtering, team member profiles, construction project tracking, blog content management, and lead generation capabilities.
+
+## Recent Changes (January 2025)
+
+✓ Successfully migrated from PostgreSQL to MongoDB Atlas
+✓ Updated company branding from "GIFI" to "Gift Real Estate" 
+✓ Removed admin login button from public landing page
+✓ Created dedicated admin login page at `/login`
+✓ Fixed authentication flow and session management
 
 # User Preferences
 

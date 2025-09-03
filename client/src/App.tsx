@@ -10,6 +10,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 
 // Public Pages
 import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
 import Properties from "@/pages/Properties";
 import PropertyDetail from "@/pages/PropertyDetail";
 import Projects from "@/pages/Projects";
@@ -36,7 +37,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = "/login";
       }, 1000);
     }
   }, [isAuthenticated, isLoading, toast, location]);
@@ -70,6 +71,7 @@ function Router() {
     <Switch>
       {/* Public Routes */}
       <Route path="/" component={Landing} />
+      <Route path="/login" component={Login} />
       <Route path="/properties" component={Properties} />
       <Route path="/property/:id" component={PropertyDetail} />
       <Route path="/projects" component={Projects} />

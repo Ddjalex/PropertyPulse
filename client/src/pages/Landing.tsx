@@ -97,11 +97,6 @@ export default function Landing() {
                 <Phone size={16} />
                 <span>+251-911-123-456</span>
               </div>
-              <Link href="/api/login">
-                <Button variant="secondary" size="sm" data-testid="button-admin-login">
-                  Admin
-                </Button>
-              </Link>
               <button 
                 className="md:hidden"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
