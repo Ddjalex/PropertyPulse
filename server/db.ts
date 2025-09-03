@@ -9,7 +9,7 @@ if (!process.env.MONGODB_URI) {
 // Connect to MongoDB with specific database name
 const connectDB = async () => {
   try {
-    const uri = process.env.MONGODB_URI || 'mongodb+srv://alealemeseged_db_user:A11l2m3e4s5@timnit.vlysaek.mongodb.net/gift_real_estate?retryWrites=true&w=majority&appName=Timnit';
+    const uri = process.env.MONGODB_URI!;
     await mongoose.connect(uri, {
       connectTimeoutMS: 30000,
       socketTimeoutMS: 30000,
