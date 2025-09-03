@@ -43,15 +43,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         },
       });
       
-      if (response.ok) {
-        window.location.href = '/login';
-      } else {
-        // If logout fails, still redirect to login
-        window.location.href = '/login';
-      }
+      // Force reload and redirect regardless of response
+      window.location.replace('/login');
     } catch (error) {
-      // If there's an error, still redirect to login
-      window.location.href = '/login';
+      // Force reload and redirect even on error
+      window.location.replace('/login');
     }
   };
 
@@ -164,8 +160,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Page content */}
-        <main className="p-6">
-          {children}
+        <main className="p-6 min-h-screen bg-background">
+          <div className="w-full">
+            {children}
+          </div>
         </main>
       </div>
     </div>
