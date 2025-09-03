@@ -34,8 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -186,8 +185,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Property management
   app.post('/api/admin/properties', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || !['admin', 'editor', 'agent'].includes(user.role || '')) {
         return res.status(403).json({ message: "Unauthorized" });
@@ -196,7 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const propertyData = insertPropertySchema.parse(req.body);
       const property = await storage.createProperty({
         ...propertyData,
-        agentId: userId,
+        agentId: user.id,
       });
       res.status(201).json(property);
     } catch (error) {
@@ -213,8 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/properties/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || !['admin', 'editor', 'agent'].includes(user.role || '')) {
         return res.status(403).json({ message: "Unauthorized" });
@@ -237,8 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/properties/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || !['admin', 'editor'].includes(user.role || '')) {
         return res.status(403).json({ message: "Unauthorized" });
@@ -255,8 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Project management
   app.post('/api/admin/projects', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || !['admin', 'editor'].includes(user.role || '')) {
         return res.status(403).json({ message: "Unauthorized" });
@@ -279,8 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || !['admin', 'editor'].includes(user.role || '')) {
         return res.status(403).json({ message: "Unauthorized" });
@@ -303,8 +297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/projects/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Unauthorized" });
@@ -321,8 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Lead management
   app.get('/api/admin/leads', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || !['admin', 'editor', 'agent'].includes(user.role || '')) {
         return res.status(403).json({ message: "Unauthorized" });
@@ -339,8 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/leads/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || !['admin', 'editor', 'agent'].includes(user.role || '')) {
         return res.status(403).json({ message: "Unauthorized" });
@@ -364,8 +355,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Team management
   app.post('/api/admin/team', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Unauthorized" });
@@ -388,8 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/team/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Unauthorized" });
@@ -413,8 +402,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Settings management
   app.post('/api/admin/settings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const user = (req.session as any).user;
       
       if (!user || user.role !== 'admin') {
         return res.status(403).json({ message: "Unauthorized" });
