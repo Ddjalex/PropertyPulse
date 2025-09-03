@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import mongoose from "./db";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
@@ -15,6 +16,20 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
+
+  // Health check endpoint
+  app.get('/api/health', async (req, res) => {
+    try {
+      const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+      res.json({ 
+        status: 'ok', 
+        database: dbStatus,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ status: 'error', error: String(error) });
+    }
+  });
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

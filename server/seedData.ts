@@ -22,7 +22,7 @@ export async function seedInitialData() {
           description: "Beautiful 4-bedroom villa with modern amenities and great location in Bole area.",
           price: 8500000,
           listingType: "sale",
-          type: "villa",
+          propertyType: "villa",
           bedrooms: 4,
           bathrooms: 3,
           area: 350,
@@ -36,7 +36,7 @@ export async function seedInitialData() {
           description: "Prime commercial space perfect for business operations in the heart of the city.",
           price: 120000,
           listingType: "rent",
-          type: "commercial",
+          propertyType: "commercial",
           area: 200,
           location: "CMC, Addis Ababa", 
           status: "available",
@@ -76,7 +76,7 @@ export async function seedInitialData() {
       const sampleTeam = [
         {
           name: "Alex Mekonnen",
-          role: "Senior Real Estate Agent", 
+          position: "Senior Real Estate Agent", 
           email: "alex@giftrealestate.com",
           phone: "+251911123456",
           whatsapp: "+251911123456",

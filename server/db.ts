@@ -6,25 +6,28 @@ if (!process.env.MONGODB_URI) {
   );
 }
 
-// Connect to MongoDB with specific database name
+// Connect to MongoDB with optimized settings for Replit
 const connectDB = async () => {
   try {
     const uri = process.env.MONGODB_URI!;
     await mongoose.connect(uri, {
-      connectTimeoutMS: 30000,
-      socketTimeoutMS: 30000,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      retryWrites: true
     });
     console.log('✅ Connected to MongoDB successfully');
+    
+    // Import and run data seeding after connection is established
+    const { seedInitialData } = await import('./seedData');
+    await seedInitialData();
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
-    process.exit(1);
+    // Don't exit process in development, retry connection
+    setTimeout(connectDB, 5000);
   }
 };
 
-connectDB().then(async () => {
-  // Import and run data seeding after connection is established
-  const { seedInitialData } = await import('./seedData');
-  await seedInitialData();
-});
+connectDB();
 
 export default mongoose;
