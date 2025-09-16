@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import mongoose from "./db";
+import { db } from "./db";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { 
@@ -9,8 +9,9 @@ import {
   insertBlogPostSchema, 
   insertTeamMemberSchema, 
   insertLeadSchema,
-  insertSettingSchema 
-} from "@shared/models";
+  insertSettingSchema,
+  users
+} from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -20,7 +21,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint
   app.get('/api/health', async (req, res) => {
     try {
-      const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+      // Test database connection by running a simple query
+      await db.select().from(users).limit(1);
+      const dbStatus = 'connected';
       res.json({ 
         status: 'ok', 
         database: dbStatus,

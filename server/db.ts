@@ -1,33 +1,17 @@
-import mongoose from 'mongoose';
+import { Pool, neonConfig } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import ws from "ws";
+import * as schema from "@shared/schema";
 
-if (!process.env.MONGODB_URI) {
+neonConfig.webSocketConstructor = ws;
+
+if (!process.env.DATABASE_URL) {
   throw new Error(
-    "MONGODB_URI must be set. Did you forget to set your MongoDB connection string?",
+    "DATABASE_URL must be set. Did you forget to provision a database?",
   );
 }
 
-// Connect to MongoDB with optimized settings for Replit
-const connectDB = async () => {
-  try {
-    const uri = process.env.MONGODB_URI!;
-    await mongoose.connect(uri, {
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      retryWrites: true
-    });
-    console.log('✅ Connected to MongoDB successfully');
-    
-    // Import and run data seeding after connection is established
-    const { seedInitialData } = await import('./seedData');
-    await seedInitialData();
-  } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
-    // Don't exit process in development, retry connection
-    setTimeout(connectDB, 5000);
-  }
-};
+export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const db = drizzle({ client: pool, schema });
 
-connectDB();
-
-export default mongoose;
+console.log('✅ Connected to PostgreSQL successfully');

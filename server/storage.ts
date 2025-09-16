@@ -1,13 +1,13 @@
-import mongoose from "./db";
+import { db } from "./db";
 import {
-  UserModel,
-  PropertyModel,
-  ProjectModel,
-  ConstructionUpdateModel,
-  BlogPostModel,
-  TeamMemberModel,
-  LeadModel,
-  SettingModel,
+  users,
+  properties,
+  projects,
+  constructionUpdates,
+  blogPosts,
+  teamMembers,
+  leads,
+  settings,
   type User,
   type UpsertUser,
   type Property,
@@ -23,7 +23,8 @@ import {
   type InsertLead,
   type Setting,
   type InsertSetting,
-} from "@shared/models";
+} from "@shared/schema";
+import { eq, and, gte, lte, desc, asc, ilike } from "drizzle-orm";
 
 export interface IStorage {
   // User operations - mandatory for Replit Auth
@@ -87,39 +88,42 @@ export interface IStorage {
 export class DatabaseStorage implements IStorage {
   // User operations - mandatory for Replit Auth
   async getUser(id: string): Promise<User | undefined> {
-    const user = await UserModel.findById(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     return user || undefined;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
     if (userData.id) {
       // Try to find and update existing user by id
-      const existingUser = await UserModel.findByIdAndUpdate(
-        userData.id,
-        { ...userData, updatedAt: new Date() },
-        { new: true, setDefaultsOnInsert: true }
-      );
+      const [existingUser] = await db
+        .update(users)
+        .set({ ...userData, updatedAt: new Date() })
+        .where(eq(users.id, userData.id))
+        .returning();
       if (existingUser) return existingUser;
     }
     
     // If user has email, try to find by email first
     if (userData.email) {
-      const existingUser = await UserModel.findOneAndUpdate(
-        { email: userData.email },
-        { ...userData, updatedAt: new Date() },
-        { new: true, setDefaultsOnInsert: true }
-      );
+      const [existingUser] = await db
+        .update(users)
+        .set({ ...userData, updatedAt: new Date() })
+        .where(eq(users.email, userData.email))
+        .returning();
       if (existingUser) return existingUser;
     }
     
     // Create new user
-    const newUser = new UserModel({ 
-      ...(userData.id && { _id: userData.id }),
-      ...userData, 
-      createdAt: new Date(), 
-      updatedAt: new Date() 
-    });
-    return await newUser.save();
+    const [newUser] = await db
+      .insert(users)
+      .values({ 
+        ...(userData.id && { id: userData.id }),
+        ...userData, 
+        createdAt: new Date(), 
+        updatedAt: new Date() 
+      })
+      .returning();
+    return newUser;
   }
 
   // Property operations
@@ -132,199 +136,234 @@ export class DatabaseStorage implements IStorage {
     maxPrice?: number;
     featured?: boolean;
   }): Promise<Property[]> {
-    const query: any = {};
+    let query = db.select().from(properties);
+    const conditions = [];
     
     if (filters) {
-      if (filters.type) query.propertyType = filters.type;
-      if (filters.listingType) query.listingType = filters.listingType;
-      if (filters.status) query.status = filters.status;
-      if (filters.location) query.location = { $regex: filters.location, $options: 'i' };
-      if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-        query.price = {};
-        if (filters.minPrice !== undefined) query.price.$gte = filters.minPrice;
-        if (filters.maxPrice !== undefined) query.price.$lte = filters.maxPrice;
-      }
-      if (filters.featured !== undefined) query.featured = filters.featured;
+      if (filters.type) conditions.push(eq(properties.propertyType, filters.type as any));
+      if (filters.listingType) conditions.push(eq(properties.listingType, filters.listingType as any));
+      if (filters.status) conditions.push(eq(properties.status, filters.status as any));
+      if (filters.location) conditions.push(ilike(properties.location, `%${filters.location}%`));
+      if (filters.minPrice !== undefined) conditions.push(gte(properties.price, filters.minPrice.toString()));
+      if (filters.maxPrice !== undefined) conditions.push(lte(properties.price, filters.maxPrice.toString()));
+      if (filters.featured !== undefined) conditions.push(eq(properties.featured, filters.featured));
     }
     
-    return await PropertyModel.find(query).sort({ createdAt: -1 });
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+    
+    return await query.orderBy(desc(properties.createdAt));
   }
 
   async getProperty(id: string): Promise<Property | undefined> {
-    const property = await PropertyModel.findById(id);
+    const [property] = await db.select().from(properties).where(eq(properties.id, id));
     return property || undefined;
   }
 
   async createProperty(property: InsertProperty): Promise<Property> {
-    const newProperty = new PropertyModel(property);
-    return await newProperty.save();
+    const [newProperty] = await db
+      .insert(properties)
+      .values(property)
+      .returning();
+    return newProperty;
   }
 
   async updateProperty(id: string, property: Partial<InsertProperty>): Promise<Property> {
-    const updatedProperty = await PropertyModel.findByIdAndUpdate(
-      id,
-      { ...property, updatedAt: new Date() },
-      { new: true }
-    );
+    const [updatedProperty] = await db
+      .update(properties)
+      .set({ ...property, updatedAt: new Date() })
+      .where(eq(properties.id, id))
+      .returning();
     if (!updatedProperty) throw new Error('Property not found');
     return updatedProperty;
   }
 
   async deleteProperty(id: string): Promise<void> {
-    await PropertyModel.findByIdAndDelete(id);
+    await db.delete(properties).where(eq(properties.id, id));
   }
 
   // Project operations
   async getProjects(): Promise<Project[]> {
-    return await ProjectModel.find().sort({ createdAt: -1 });
+    return await db.select().from(projects).orderBy(desc(projects.createdAt));
   }
 
   async getProject(id: string): Promise<Project | undefined> {
-    const project = await ProjectModel.findById(id);
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
     return project || undefined;
   }
 
   async createProject(project: InsertProject): Promise<Project> {
-    const newProject = new ProjectModel(project);
-    return await newProject.save();
+    const [newProject] = await db
+      .insert(projects)
+      .values(project)
+      .returning();
+    return newProject;
   }
 
   async updateProject(id: string, project: Partial<InsertProject>): Promise<Project> {
-    const updatedProject = await ProjectModel.findByIdAndUpdate(
-      id,
-      { ...project, updatedAt: new Date() },
-      { new: true }
-    );
+    const [updatedProject] = await db
+      .update(projects)
+      .set({ ...project, updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning();
     if (!updatedProject) throw new Error('Project not found');
     return updatedProject;
   }
 
   async deleteProject(id: string): Promise<void> {
-    await ProjectModel.findByIdAndDelete(id);
+    await db.delete(projects).where(eq(projects.id, id));
   }
 
   // Construction update operations
   async getConstructionUpdates(projectId?: string): Promise<ConstructionUpdate[]> {
-    const query = projectId ? { projectId } : {};
-    return await ConstructionUpdateModel.find(query).sort({ updateDate: -1 });
+    let query = db.select().from(constructionUpdates);
+    if (projectId) {
+      query = query.where(eq(constructionUpdates.projectId, projectId));
+    }
+    return await query.orderBy(desc(constructionUpdates.updateDate));
   }
 
   async createConstructionUpdate(update: any): Promise<ConstructionUpdate> {
-    const newUpdate = new ConstructionUpdateModel(update);
-    return await newUpdate.save();
+    const [newUpdate] = await db
+      .insert(constructionUpdates)
+      .values(update)
+      .returning();
+    return newUpdate;
   }
 
   // Blog operations
   async getBlogPosts(published?: boolean): Promise<BlogPost[]> {
-    const query = published !== undefined ? { published } : {};
-    return await BlogPostModel.find(query).sort({ createdAt: -1 });
+    let query = db.select().from(blogPosts);
+    if (published !== undefined) {
+      query = query.where(eq(blogPosts.published, published));
+    }
+    return await query.orderBy(desc(blogPosts.createdAt));
   }
 
   async getBlogPost(id: string): Promise<BlogPost | undefined> {
-    const post = await BlogPostModel.findById(id);
+    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
     return post || undefined;
   }
 
   async getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
-    const post = await BlogPostModel.findOne({ slug });
+    const [post] = await db.select().from(blogPosts).where(eq(blogPosts.slug, slug));
     return post || undefined;
   }
 
   async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
-    const newPost = new BlogPostModel(post);
-    return await newPost.save();
+    const [newPost] = await db
+      .insert(blogPosts)
+      .values(post)
+      .returning();
+    return newPost;
   }
 
   async updateBlogPost(id: string, post: Partial<InsertBlogPost>): Promise<BlogPost> {
-    const updatedPost = await BlogPostModel.findByIdAndUpdate(
-      id,
-      { ...post, updatedAt: new Date() },
-      { new: true }
-    );
+    const [updatedPost] = await db
+      .update(blogPosts)
+      .set({ ...post, updatedAt: new Date() })
+      .where(eq(blogPosts.id, id))
+      .returning();
     if (!updatedPost) throw new Error('Blog post not found');
     return updatedPost;
   }
 
   async deleteBlogPost(id: string): Promise<void> {
-    await BlogPostModel.findByIdAndDelete(id);
+    await db.delete(blogPosts).where(eq(blogPosts.id, id));
   }
 
   // Team operations
   async getTeamMembers(active?: boolean): Promise<TeamMember[]> {
-    const query = active !== undefined ? { active } : {};
-    return await TeamMemberModel.find(query).sort({ displayOrder: 1 });
+    let query = db.select().from(teamMembers);
+    if (active !== undefined) {
+      query = query.where(eq(teamMembers.active, active));
+    }
+    return await query.orderBy(asc(teamMembers.displayOrder));
   }
 
   async getTeamMember(id: string): Promise<TeamMember | undefined> {
-    const member = await TeamMemberModel.findById(id);
+    const [member] = await db.select().from(teamMembers).where(eq(teamMembers.id, id));
     return member || undefined;
   }
 
   async createTeamMember(member: InsertTeamMember): Promise<TeamMember> {
-    const newMember = new TeamMemberModel(member);
-    return await newMember.save();
+    const [newMember] = await db
+      .insert(teamMembers)
+      .values(member)
+      .returning();
+    return newMember;
   }
 
   async updateTeamMember(id: string, member: Partial<InsertTeamMember>): Promise<TeamMember> {
-    const updatedMember = await TeamMemberModel.findByIdAndUpdate(
-      id,
-      { ...member, updatedAt: new Date() },
-      { new: true }
-    );
+    const [updatedMember] = await db
+      .update(teamMembers)
+      .set({ ...member, updatedAt: new Date() })
+      .where(eq(teamMembers.id, id))
+      .returning();
     if (!updatedMember) throw new Error('Team member not found');
     return updatedMember;
   }
 
   async deleteTeamMember(id: string): Promise<void> {
-    await TeamMemberModel.findByIdAndDelete(id);
+    await db.delete(teamMembers).where(eq(teamMembers.id, id));
   }
 
   // Lead operations
   async getLeads(status?: string): Promise<Lead[]> {
-    const query = status ? { status } : {};
-    return await LeadModel.find(query).sort({ createdAt: -1 });
+    let query = db.select().from(leads);
+    if (status) {
+      query = query.where(eq(leads.status, status));
+    }
+    return await query.orderBy(desc(leads.createdAt));
   }
 
   async getLead(id: string): Promise<Lead | undefined> {
-    const lead = await LeadModel.findById(id);
+    const [lead] = await db.select().from(leads).where(eq(leads.id, id));
     return lead || undefined;
   }
 
   async createLead(lead: InsertLead): Promise<Lead> {
-    const newLead = new LeadModel(lead);
-    return await newLead.save();
+    const [newLead] = await db
+      .insert(leads)
+      .values(lead)
+      .returning();
+    return newLead;
   }
 
   async updateLead(id: string, lead: Partial<InsertLead>): Promise<Lead> {
-    const updatedLead = await LeadModel.findByIdAndUpdate(
-      id,
-      { ...lead, updatedAt: new Date() },
-      { new: true }
-    );
+    const [updatedLead] = await db
+      .update(leads)
+      .set({ ...lead, updatedAt: new Date() })
+      .where(eq(leads.id, id))
+      .returning();
     if (!updatedLead) throw new Error('Lead not found');
     return updatedLead;
   }
 
   async deleteLead(id: string): Promise<void> {
-    await LeadModel.findByIdAndDelete(id);
+    await db.delete(leads).where(eq(leads.id, id));
   }
 
   // Settings operations
   async getSettings(): Promise<Setting[]> {
-    return await SettingModel.find().sort({ key: 1 });
+    return await db.select().from(settings).orderBy(asc(settings.key));
   }
 
   async getSetting(key: string): Promise<Setting | undefined> {
-    const setting = await SettingModel.findOne({ key });
+    const [setting] = await db.select().from(settings).where(eq(settings.key, key));
     return setting || undefined;
   }
 
   async upsertSetting(setting: InsertSetting): Promise<Setting> {
-    const updatedSetting = await SettingModel.findOneAndUpdate(
-      { key: setting.key },
-      { ...setting, updatedAt: new Date() },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+    const [updatedSetting] = await db
+      .insert(settings)
+      .values({ ...setting, updatedAt: new Date() })
+      .onConflictDoUpdate({
+        target: settings.key,
+        set: { ...setting, updatedAt: new Date() }
+      })
+      .returning();
     return updatedSetting;
   }
 }
