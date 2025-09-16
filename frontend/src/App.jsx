@@ -13,6 +13,8 @@ import AdminDashboard from './pages/admin/Dashboard'
 import PropertyManagement from './pages/admin/PropertyManagement'
 import LeadManagement from './pages/admin/LeadManagement'
 import TeamManagement from './pages/admin/TeamManagement'
+import Analytics from './pages/admin/Analytics'
+import Settings from './pages/admin/Settings'
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
           <Route path="properties" element={<PropertyManagement />} />
           <Route path="leads" element={<LeadManagement />} />
           <Route path="team" element={<TeamManagement />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
 
         {/* Public Routes */}

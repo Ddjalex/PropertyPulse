@@ -11,17 +11,25 @@ const app = express();
 // Session store
 const store = new MongoStore({
   uri: process.env.MONGODB_URI,
-  collection: 'sessions'
+  collection: 'admin_sessions',
+  expires: 24 * 60 * 60 * 1000, // 24 hours
+  autoRemove: 'native'
+});
+
+// Handle store connection errors
+store.on('error', function(error) {
+  console.log('Session store error:', error);
 });
 
 // Session middleware
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'fallback-secret-change-in-production',
+  secret: process.env.SESSION_SECRET || 'gift-realestate-secret-key-2024',
   resave: false,
   saveUninitialized: false,
   store: store,
+  name: 'admin.sid',
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Set to true only in production with HTTPS
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
