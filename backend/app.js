@@ -103,6 +103,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 

@@ -157,6 +157,37 @@ export const adminApi = {
       throw new Error(`Admin API error: ${response.status}`)
     }
     return response.json()
+  },
+
+  // Multipart form data for file uploads
+  postMultipart: async (endpoint, formData) => {
+    const response = await fetch(`${API_BASE_URL}/admin${endpoint}`, {
+      method: 'POST',
+      body: formData, // Don't set Content-Type header, let browser set it
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.')
+      }
+      throw new Error(`Admin API error: ${response.status}`)
+    }
+    return response.json()
+  },
+
+  putMultipart: async (endpoint, formData) => {
+    const response = await fetch(`${API_BASE_URL}/admin${endpoint}`, {
+      method: 'PUT',
+      body: formData, // Don't set Content-Type header, let browser set it
+      credentials: 'include'
+    })
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.')
+      }
+      throw new Error(`Admin API error: ${response.status}`)
+    }
+    return response.json()
   }
 }
 

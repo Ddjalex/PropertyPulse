@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { publicApi, adminApi } from '../../utils/api'
+import PropertyForm from '../../components/PropertyForm'
 import { 
   Building, 
   Plus, 
@@ -27,6 +28,7 @@ export default function PropertyManagement() {
     priceRange: ''
   })
   const [showAddForm, setShowAddForm] = useState(false)
+  const [editingProperty, setEditingProperty] = useState(null)
 
   useEffect(() => {
     fetchProperties()
@@ -105,6 +107,20 @@ export default function PropertyManagement() {
     }
   }
 
+  const handleEditProperty = (property) => {
+    setEditingProperty(property)
+  }
+
+  const handleFormClose = () => {
+    setShowAddForm(false)
+    setEditingProperty(null)
+  }
+
+  const handleFormSave = (savedProperty) => {
+    fetchProperties() // Refresh the list
+    handleFormClose()
+  }
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-ET', {
       style: 'currency',
@@ -177,7 +193,11 @@ export default function PropertyManagement() {
             <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-full">
               <Eye className="h-4 w-4" />
             </button>
-            <button className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-full">
+            <button 
+              onClick={() => handleEditProperty(property)}
+              className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-full"
+              data-testid={`button-edit-${property.id}`}
+            >
               <Edit2 className="h-4 w-4" />
             </button>
             <button 
@@ -218,6 +238,7 @@ export default function PropertyManagement() {
         <button 
           onClick={() => setShowAddForm(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+          data-testid="button-add-property"
         >
           <Plus className="h-4 w-4" />
           <span>Add Property</span>
@@ -349,6 +370,16 @@ export default function PropertyManagement() {
           <h3 className="text-lg font-medium text-gray-900 mb-2">No properties found</h3>
           <p className="text-gray-600">Try adjusting your search filters or add a new property.</p>
         </div>
+      )}
+
+      {/* Property Form Modal */}
+      {(showAddForm || editingProperty) && (
+        <PropertyForm
+          mode={showAddForm ? 'add' : 'edit'}
+          property={editingProperty}
+          onClose={handleFormClose}
+          onSave={handleFormSave}
+        />
       )}
     </div>
   )
