@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { publicApi, adminApi } from '../../utils/api'
 import { 
   Users,
   Plus,
@@ -30,8 +31,7 @@ export default function TeamManagement() {
 
   const fetchTeamMembers = async () => {
     try {
-      const response = await fetch('/api/team')
-      const data = await response.json()
+      const data = await publicApi.get('/team')
       const mappedData = data.map(member => ({
         ...member,
         id: member._id
@@ -65,13 +65,7 @@ export default function TeamManagement() {
 
   const updateMemberStatus = async (memberId, active) => {
     try {
-      await fetch(`/api/admin/team/${memberId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ active })
-      })
+      await adminApi.patch(`/team/${memberId}`, { active })
       fetchTeamMembers()
     } catch (error) {
       console.error('Error updating member status:', error)
@@ -81,9 +75,7 @@ export default function TeamManagement() {
   const deleteMember = async (memberId) => {
     if (window.confirm('Are you sure you want to delete this team member?')) {
       try {
-        await fetch(`/api/admin/team/${memberId}`, {
-          method: 'DELETE'
-        })
+        await adminApi.delete(`/team/${memberId}`)
         fetchTeamMembers()
       } catch (error) {
         console.error('Error deleting member:', error)

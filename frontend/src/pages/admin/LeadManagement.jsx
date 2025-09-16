@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { adminApi } from '../../utils/api'
 import { 
   MessageSquare,
   Phone,
@@ -33,8 +34,7 @@ export default function LeadManagement() {
 
   const fetchLeads = async () => {
     try {
-      const response = await fetch('/api/admin/leads')
-      const data = await response.json()
+      const data = await adminApi.get('/leads')
       const mappedData = data.map(lead => ({
         ...lead,
         id: lead._id
@@ -72,13 +72,7 @@ export default function LeadManagement() {
 
   const updateLeadStatus = async (leadId, newStatus) => {
     try {
-      await fetch(`/api/admin/leads/${leadId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status: newStatus })
-      })
+      await adminApi.patch(`/leads/${leadId}`, { status: newStatus })
       fetchLeads()
     } catch (error) {
       console.error('Error updating lead status:', error)
@@ -88,9 +82,7 @@ export default function LeadManagement() {
   const deleteLead = async (leadId) => {
     if (window.confirm('Are you sure you want to delete this lead?')) {
       try {
-        await fetch(`/api/admin/leads/${leadId}`, {
-          method: 'DELETE'
-        })
+        await adminApi.delete(`/leads/${leadId}`)
         fetchLeads()
       } catch (error) {
         console.error('Error deleting lead:', error)

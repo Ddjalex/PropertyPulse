@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation, Outlet } from 'react-router-dom'
+import AdminAuthGuard from './AdminAuthGuard'
 import { 
   LayoutDashboard,
   Building,
@@ -34,7 +35,8 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <AdminAuthGuard>
+      <div className="min-h-screen bg-gray-50">
       {/* Mobile sidebar */}
       <div className={`fixed inset-0 flex z-40 md:hidden ${sidebarOpen ? '' : 'hidden'}`}>
         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
@@ -134,5 +136,6 @@ export default function AdminLayout() {
         </main>
       </div>
     </div>
+    </AdminAuthGuard>
   )
 }

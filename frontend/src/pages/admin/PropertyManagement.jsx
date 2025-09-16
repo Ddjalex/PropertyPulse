@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { publicApi, adminApi } from '../../utils/api'
 import { 
   Building, 
   Plus, 
@@ -37,8 +38,7 @@ export default function PropertyManagement() {
 
   const fetchProperties = async () => {
     try {
-      const response = await fetch('/api/properties')
-      const data = await response.json()
+      const data = await publicApi.get('/properties')
       const mappedData = data.map(property => ({
         ...property,
         id: property._id
@@ -97,9 +97,7 @@ export default function PropertyManagement() {
   const handleDeleteProperty = async (id) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
       try {
-        await fetch(`/api/admin/properties/${id}`, {
-          method: 'DELETE'
-        })
+        await adminApi.delete(`/properties/${id}`)
         fetchProperties()
       } catch (error) {
         console.error('Error deleting property:', error)

@@ -14,6 +14,15 @@ router.get('/properties', async (req, res) => {
     if (req.query.location) filters.location = new RegExp(req.query.location, 'i');
     if (req.query.featured === 'true') filters.featured = true;
     
+    // Text search functionality
+    if (req.query.search) {
+      filters.$or = [
+        { title: { $regex: req.query.search, $options: 'i' } },
+        { location: { $regex: req.query.search, $options: 'i' } },
+        { description: { $regex: req.query.search, $options: 'i' } }
+      ];
+    }
+    
     // Price filtering
     if (req.query.minPrice || req.query.maxPrice) {
       filters.price = {};
@@ -57,61 +66,6 @@ router.get('/properties/:id', async (req, res) => {
   }
 });
 
-// Create new property (admin only)
-router.post('/properties', async (req, res) => {
-  try {
-    const property = new PropertyModel(req.body);
-    await property.save();
-    
-    const transformedProperty = {
-      ...property.toObject(),
-      id: property._id.toString()
-    };
-    
-    res.status(201).json(transformedProperty);
-  } catch (error) {
-    console.error("Error creating property:", error);
-    res.status(500).json({ message: "Failed to create property" });
-  }
-});
-
-// Update property (admin only)
-router.put('/properties/:id', async (req, res) => {
-  try {
-    const property = await PropertyModel.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body, updatedAt: new Date() },
-      { new: true }
-    );
-    
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
-    }
-    
-    const transformedProperty = {
-      ...property.toObject(),
-      id: property._id.toString()
-    };
-    
-    res.json(transformedProperty);
-  } catch (error) {
-    console.error("Error updating property:", error);
-    res.status(500).json({ message: "Failed to update property" });
-  }
-});
-
-// Delete property (admin only)
-router.delete('/properties/:id', async (req, res) => {
-  try {
-    const property = await PropertyModel.findByIdAndDelete(req.params.id);
-    if (!property) {
-      return res.status(404).json({ message: "Property not found" });
-    }
-    res.json({ message: "Property deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting property:", error);
-    res.status(500).json({ message: "Failed to delete property" });
-  }
-});
+// Admin routes moved to adminRoutes.js for proper security separation
 
 module.exports = router;

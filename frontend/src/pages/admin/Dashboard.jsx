@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { publicApi, adminApi } from '../../utils/api'
 import { 
   Building, 
   Users, 
@@ -30,17 +31,14 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        // Fetch properties
-        const propertiesResponse = await fetch('/api/properties')
-        const properties = await propertiesResponse.json()
+        // Fetch properties (public)
+        const properties = await publicApi.get('/properties')
         
-        // Fetch leads
-        const leadsResponse = await fetch('/api/admin/leads')
-        const leads = await leadsResponse.json()
+        // Fetch leads (admin protected)
+        const leads = await adminApi.get('/leads')
         
-        // Fetch team members
-        const teamResponse = await fetch('/api/team')
-        const team = await teamResponse.json()
+        // Fetch team members (public)
+        const team = await publicApi.get('/team')
 
         // Calculate stats
         const activeProperties = properties.filter(p => p.status === 'available').length
