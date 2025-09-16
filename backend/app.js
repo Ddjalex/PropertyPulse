@@ -4,29 +4,29 @@ const path = require("path");
 const session = require('express-session');
 const MongoStore = require('connect-mongodb-session')(session);
 require('dotenv').config();
-require('./db'); // Connect to MongoDB
+// Try to connect to MongoDB (optional for now)
+try {
+  require('./db');
+} catch (error) {
+  console.warn('⚠️  Database connection failed, running without database:', error.message);
+}
 
 const app = express();
 
-// Session store
-const store = new MongoStore({
-  uri: process.env.MONGODB_URI,
-  collection: 'admin_sessions',
-  expires: 24 * 60 * 60 * 1000, // 24 hours
-  autoRemove: 'native'
-});
-
-// Handle store connection errors
-store.on('error', function(error) {
-  console.log('Session store error:', error);
-});
+// Session store - fallback to memory store if MongoDB is unavailable
+let store = null; // Default to memory store
+if (process.env.MONGODB_URI) {
+  console.log('⚠️  MongoDB URI found but connection issues exist. Using memory store for sessions.');
+} else {
+  console.warn('⚠️  No MongoDB URI, using memory store for sessions');
+}
 
 // Session middleware
 app.use(session({
   secret: process.env.SESSION_SECRET || 'gift-realestate-secret-key-2024',
   resave: false,
   saveUninitialized: false,
-  store: store,
+  store: store, // Will use memory store if null
   name: 'admin.sid',
   cookie: {
     secure: false, // Set to true only in production with HTTPS

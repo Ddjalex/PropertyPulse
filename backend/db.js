@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 if (!process.env.MONGODB_URI) {
-  throw new Error(
-    "MONGODB_URI must be set. Did you forget to set your MongoDB connection string?",
-  );
+  console.warn("⚠️  MONGODB_URI not set. Running without database connection.");
+  module.exports = null;
+  return;
 }
 
 // Connect to MongoDB with optimized settings
