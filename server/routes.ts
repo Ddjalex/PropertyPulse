@@ -58,7 +58,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const properties = await storage.getProperties(filters);
-      res.json(properties);
+      // Transform _id to id for frontend compatibility
+      const transformedProperties = properties.map(property => ({
+        ...property.toObject(),
+        id: (property as any)._id.toString()
+      }));
+      res.json(transformedProperties);
     } catch (error) {
       console.error("Error fetching properties:", error);
       res.status(500).json({ message: "Failed to fetch properties" });
@@ -71,7 +76,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!property) {
         return res.status(404).json({ message: "Property not found" });
       }
-      res.json(property);
+      // Transform _id to id for frontend compatibility
+      const transformedProperty = {
+        ...property.toObject(),
+        id: (property as any)._id.toString()
+      };
+      res.json(transformedProperty);
     } catch (error) {
       console.error("Error fetching property:", error);
       res.status(500).json({ message: "Failed to fetch property" });
@@ -82,7 +92,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/projects', async (req, res) => {
     try {
       const projects = await storage.getProjects();
-      res.json(projects);
+      // Transform _id to id for frontend compatibility
+      const transformedProjects = projects.map(project => ({
+        ...project.toObject(),
+        id: (project as any)._id.toString()
+      }));
+      res.json(transformedProjects);
     } catch (error) {
       console.error("Error fetching projects:", error);
       res.status(500).json({ message: "Failed to fetch projects" });
@@ -131,7 +146,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const active = req.query.active === 'false' ? false : true;
       const members = await storage.getTeamMembers(active);
-      res.json(members);
+      // Transform _id to id for frontend compatibility
+      const transformedMembers = members.map(member => ({
+        ...member.toObject(),
+        id: (member as any)._id.toString()
+      }));
+      res.json(transformedMembers);
     } catch (error) {
       console.error("Error fetching team members:", error);
       res.status(500).json({ message: "Failed to fetch team members" });
