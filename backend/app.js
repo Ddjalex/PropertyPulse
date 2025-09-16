@@ -1,10 +1,31 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const session = require('express-session');
+const MongoStore = require('connect-mongodb-session')(session);
 require('dotenv').config();
 require('./db'); // Connect to MongoDB
 
 const app = express();
+
+// Session store
+const store = new MongoStore({
+  uri: process.env.MONGODB_URI,
+  collection: 'sessions'
+});
+
+// Session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'fallback-secret-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  store: store,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
 // Middleware
 app.use(cors({
@@ -16,25 +37,15 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-// Simple admin authentication middleware
+// Session-based admin authentication middleware
 const adminAuth = (req, res, next) => {
-  const adminKey = req.headers['x-admin-key']
-  const validAdminKey = process.env.ADMIN_API_KEY
-  
-  if (!validAdminKey) {
-    console.error('ADMIN_API_KEY environment variable is not set!')
-    return res.status(500).json({ 
-      error: 'Server configuration error. Admin access unavailable.' 
-    })
-  }
-  
-  if (!adminKey || adminKey !== validAdminKey) {
+  if (!req.session.adminId || !req.session.isAdmin) {
     return res.status(401).json({ 
-      error: 'Unauthorized. Admin access required.' 
-    })
+      error: 'Unauthorized. Admin login required.' 
+    });
   }
   
-  next()
+  next();
 };
 
 // Request logging middleware (secure - no response body logging)
@@ -59,12 +70,16 @@ const projectRoutes = require('./routes/projectRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const leadRoutes = require('./routes/leadRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 // Public routes
 app.use('/api', propertyRoutes);
 app.use('/api', projectRoutes);
 app.use('/api', teamRoutes);
 app.use('/api', leadRoutes);
+
+// Authentication routes
+app.use('/api/auth', authRoutes);
 
 // Protected admin routes
 app.use('/api/admin', adminAuth, adminRoutes);
