@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, X, Phone, Mail } from 'lucide-react'
+import logo from '../assets/gift-logo.png'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -32,10 +33,12 @@ export default function Header() {
       <nav className="container py-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="bg-primary-600 text-white p-2 rounded">
-              <span className="font-bold text-xl">GRE</span>
-            </div>
+          <Link to="/" className="flex items-center space-x-3">
+            <img 
+              src={logo} 
+              alt="Gift Real Estate Logo" 
+              className="h-12 w-12 object-contain"
+            />
             <div>
               <div className="font-bold text-xl text-gray-900">Gift Real Estate</div>
               <div className="text-sm text-gray-600">Premium Properties</div>
