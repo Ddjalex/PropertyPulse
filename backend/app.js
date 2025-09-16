@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 require('dotenv').config();
 require('./db'); // Connect to MongoDB
 
@@ -77,6 +78,20 @@ app.get('/api/health', (req, res) => {
     database: dbStatus,
     timestamp: new Date().toISOString()
   });
+});
+
+// Serve static files from React build
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
+// Handle React Router - send all non-API requests to React app
+app.get('*', (req, res) => {
+  // Skip API routes
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ message: 'API endpoint not found' });
+  }
+  
+  // Serve React app for all other routes
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
 // Error handling middleware
