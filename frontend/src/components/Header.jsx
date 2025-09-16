@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Menu, X, Phone, Mail } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import logo from '../assets/gift-logo.png'
 
 export default function Header() {
@@ -10,25 +10,6 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
-      {/* Top bar */}
-      <div className="bg-primary-600 text-white py-2">
-        <div className="container flex justify-between items-center text-sm">
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <Phone size={14} className="mr-1" />
-              <span>+251 911 123 456</span>
-            </div>
-            <div className="flex items-center">
-              <Mail size={14} className="mr-1" />
-              <span>info@giftrealestate.com</span>
-            </div>
-          </div>
-          <div className="text-sm">
-            Ethiopia's Trusted Real Estate Partner Since 1990
-          </div>
-        </div>
-      </div>
-
       {/* Main navigation */}
       <nav className="container py-4">
         <div className="flex justify-between items-center">
