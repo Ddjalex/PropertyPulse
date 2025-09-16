@@ -1,0 +1,132 @@
+import { Bed, Bath, Square, MapPin, Phone, MessageCircle, Heart } from 'lucide-react'
+
+export default function PropertyCard({ 
+  property, 
+  onCall, 
+  onWhatsApp, 
+  onFavorite, 
+  isFavorite = false 
+}) {
+  const formatPrice = (price) => {
+    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
+    if (numPrice >= 1000000) {
+      return `${(numPrice / 1000000).toFixed(1)}M`;
+    } else if (numPrice >= 1000) {
+      return `${(numPrice / 1000).toFixed(0)}K`;
+    }
+    return numPrice.toLocaleString();
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'available': return 'bg-green-100 text-green-800';
+      case 'sold': return 'bg-red-100 text-red-800';
+      case 'rented': return 'bg-blue-100 text-blue-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getListingTypeBadge = (listingType) => {
+    return listingType === 'sale' 
+      ? 'For Sale'
+      : 'For Rent';
+  };
+
+  const mainImage = property.images && property.images.length > 0 
+    ? property.images[0] 
+    : 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600';
+
+  return (
+    <div className="card property-card overflow-hidden hover:shadow-lg transition-all duration-300" data-testid={`property-card-${property.id}`}>
+      <div className="relative">
+        <img 
+          src={mainImage} 
+          alt={property.title}
+          className="w-full h-48 object-cover"
+          data-testid="property-image"
+        />
+        <div className="absolute top-4 left-4">
+          <span className={`${getStatusColor(property.status || 'available')} px-2 py-1 rounded text-xs font-medium`} data-testid="property-status">
+            {getListingTypeBadge(property.listingType)}
+          </span>
+        </div>
+        <button
+          onClick={() => onFavorite?.(property)}
+          className="absolute top-4 right-4 bg-white/90 hover:bg-white p-2 rounded-full transition-colors"
+          data-testid="button-favorite"
+        >
+          <Heart 
+            size={20} 
+            className={isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'} 
+          />
+        </button>
+      </div>
+
+      <div className="p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-2" data-testid="property-title">
+          {property.title}
+        </h3>
+        
+        <p className="text-gray-600 mb-4 flex items-center" data-testid="property-location">
+          <MapPin size={16} className="mr-1" />
+          {property.location}
+        </p>
+        
+        <div className="grid grid-cols-3 gap-4 mb-4 text-sm text-gray-600">
+          {property.bedrooms && (
+            <div className="flex items-center" data-testid="property-bedrooms">
+              <Bed size={16} className="mr-1" />
+              <span>{property.bedrooms} Beds</span>
+            </div>
+          )}
+          {property.bathrooms && (
+            <div className="flex items-center" data-testid="property-bathrooms">
+              <Bath size={16} className="mr-1" />
+              <span>{property.bathrooms} Baths</span>
+            </div>
+          )}
+          {property.area && (
+            <div className="flex items-center" data-testid="property-area">
+              <Square size={16} className="mr-1" />
+              <span>{property.area} m²</span>
+            </div>
+          )}
+        </div>
+        
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-2xl font-bold text-primary-600" data-testid="property-price">
+            ETB {formatPrice(property.price)}
+            {property.listingType === 'rent' && (
+              <span className="text-sm font-normal">/month</span>
+            )}
+          </div>
+          {property.pricePerSqm && (
+            <div className="text-sm text-gray-600" data-testid="property-price-per-sqm">
+              ETB {formatPrice(property.pricePerSqm)}/m²
+            </div>
+          )}
+        </div>
+        
+        <div className="flex space-x-2">
+          <button 
+            onClick={() => onCall?.(property)}
+            className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors"
+            data-testid="button-call"
+          >
+            <Phone size={16} />
+            <span>Call</span>
+          </button>
+          <button 
+            onClick={() => onWhatsApp?.(property)}
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors"
+            data-testid="button-whatsapp"
+          >
+            <MessageCircle size={16} />
+            <span>WhatsApp</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
