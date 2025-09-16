@@ -1,13 +1,48 @@
 // Centralized API client with admin authentication
 const API_BASE_URL = '/api'
 
-// Get admin key from session storage (secure, no fallback)
-const getAdminKey = () => {
-  const key = sessionStorage.getItem('adminApiKey')
-  if (!key) {
-    throw new Error('Admin authentication required. Please set admin key.')
+// Admin authentication functions
+export const adminLogin = async (username, password) => {
+  const response = await fetch(`${API_BASE_URL}/auth/admin/login`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ username, password })
+  })
+  
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.error || 'Login failed')
   }
-  return key
+  
+  return response.json()
+}
+
+export const adminLogout = async () => {
+  const response = await fetch(`${API_BASE_URL}/auth/admin/logout`, {
+    method: 'POST',
+    credentials: 'include'
+  })
+  
+  if (!response.ok) {
+    throw new Error('Logout failed')
+  }
+  
+  return response.json()
+}
+
+export const adminVerify = async () => {
+  const response = await fetch(`${API_BASE_URL}/auth/admin/verify`, {
+    credentials: 'include'
+  })
+  
+  if (!response.ok) {
+    throw new Error('Not authenticated')
+  }
+  
+  return response.json()
 }
 
 // Public API calls (no authentication required)
@@ -35,16 +70,19 @@ export const publicApi = {
   }
 }
 
-// Admin API calls (requires authentication)
+// Admin API calls (requires session authentication)
 export const adminApi = {
   get: async (endpoint) => {
     const response = await fetch(`${API_BASE_URL}/admin${endpoint}`, {
       headers: {
-        'X-Admin-Key': getAdminKey(),
         'Content-Type': 'application/json',
-      }
+      },
+      credentials: 'include'
     })
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.')
+      }
       throw new Error(`Admin API error: ${response.status}`)
     }
     return response.json()
@@ -54,12 +92,15 @@ export const adminApi = {
     const response = await fetch(`${API_BASE_URL}/admin${endpoint}`, {
       method: 'POST',
       headers: {
-        'X-Admin-Key': getAdminKey(),
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data)
     })
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.')
+      }
       throw new Error(`Admin API error: ${response.status}`)
     }
     return response.json()
@@ -69,12 +110,15 @@ export const adminApi = {
     const response = await fetch(`${API_BASE_URL}/admin${endpoint}`, {
       method: 'PUT',
       headers: {
-        'X-Admin-Key': getAdminKey(),
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data)
     })
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.')
+      }
       throw new Error(`Admin API error: ${response.status}`)
     }
     return response.json()
@@ -84,12 +128,15 @@ export const adminApi = {
     const response = await fetch(`${API_BASE_URL}/admin${endpoint}`, {
       method: 'PATCH',
       headers: {
-        'X-Admin-Key': getAdminKey(),
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(data)
     })
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.')
+      }
       throw new Error(`Admin API error: ${response.status}`)
     }
     return response.json()
@@ -99,38 +146,19 @@ export const adminApi = {
     const response = await fetch(`${API_BASE_URL}/admin${endpoint}`, {
       method: 'DELETE',
       headers: {
-        'X-Admin-Key': getAdminKey(),
         'Content-Type': 'application/json',
-      }
+      },
+      credentials: 'include'
     })
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Session expired. Please log in again.')
+      }
       throw new Error(`Admin API error: ${response.status}`)
     }
     return response.json()
   }
 }
 
-// Set admin key securely in session storage
-export const setAdminKey = (key) => {
-  sessionStorage.setItem('adminApiKey', key)
-}
-
-// Check if admin key is set
-export const hasAdminKey = () => {
-  return !!sessionStorage.getItem('adminApiKey')
-}
-
-// Clear admin key (logout)
-export const clearAdminKey = () => {
-  sessionStorage.removeItem('adminApiKey')
-}
-
-// Validate admin access
-export const validateAdminAccess = async () => {
-  try {
-    await adminApi.get('/leads')
-    return true
-  } catch (error) {
-    return false
-  }
-}
+// Legacy admin key functions - no longer needed with session authentication
+// Session management is now handled server-side
